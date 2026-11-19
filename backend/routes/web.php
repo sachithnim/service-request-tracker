@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// The backend is API-only. The web UI lives in the Next.js frontend.
+Route::get('/', fn () => response()->json([
+    'name' => config('app.name'),
+    'status' => 'ok',
+]));
