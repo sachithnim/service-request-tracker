@@ -16,4 +16,10 @@ class ServiceRequestPolicy
             ? Response::allow()
             : Response::denyAsNotFound();
     }
+
+    // Only the owner can change the status of their request.
+    public function update(User $user, ServiceRequest $serviceRequest): Response
+    {
+        return $this->view($user, $serviceRequest);
+    }
 }

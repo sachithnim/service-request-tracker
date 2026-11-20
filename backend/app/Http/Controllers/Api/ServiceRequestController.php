@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ListServiceRequestsRequest;
 use App\Http\Requests\StoreServiceRequestRequest;
+use App\Http\Requests\UpdateStatusRequest;
 use App\Http\Resources\ServiceRequestResource;
 use App\Http\Resources\StatusHistoryResource;
 use App\Models\ServiceRequest;
+use App\Services\StatusTransitionService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
@@ -54,5 +57,21 @@ class ServiceRequestController extends Controller
             ->get();
 
         return StatusHistoryResource::collection($history);
+    }
+
+    public function updateStatus(
+        UpdateStatusRequest $request,
+        ServiceRequest $serviceRequest,
+        StatusTransitionService $statusTransitionService,
+    ): ServiceRequestResource {
+        $serviceRequest = $statusTransitionService->transition(
+            $serviceRequest,
+            $request->enum('status', RequestStatus::class),
+            $request->integer('expected_version'),
+            $request->user(),
+            $request->validated('remark'),
+        );
+
+        return new ServiceRequestResource($serviceRequest);
     }
 }
