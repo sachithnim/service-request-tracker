@@ -19,4 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('requests', [ServiceRequestController::class, 'store']);
     Route::get('requests/{serviceRequest}', [ServiceRequestController::class, 'show']);
     Route::get('requests/{serviceRequest}/history', [ServiceRequestController::class, 'history']);
+    Route::patch('requests/{serviceRequest}/status', [ServiceRequestController::class, 'updateStatus']);
 });
