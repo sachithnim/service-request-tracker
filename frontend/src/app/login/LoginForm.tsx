@@ -50,30 +50,30 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       {message && <Alert>{message}</Alert>}
 
-      <FormField id="email" label="Email" error={errors.email}>
+      <FormField id="login-email" label="Email" error={errors.email}>
         <input
-          id="email"
+          id="login-email"
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-invalid={Boolean(errors.email)}
-          aria-describedby={errors.email ? "email-error" : undefined}
+          aria-describedby={errors.email ? "login-email-error" : undefined}
           className={inputClass}
         />
       </FormField>
 
-      <FormField id="password" label="Password" error={errors.password}>
+      <FormField id="login-password" label="Password" error={errors.password}>
         <input
-          id="password"
+          id="login-password"
           type="password"
           autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           aria-invalid={Boolean(errors.password)}
-          aria-describedby={errors.password ? "password-error" : undefined}
+          aria-describedby={errors.password ? "login-password-error" : undefined}
           className={inputClass}
         />
       </FormField>
