@@ -1,11 +1,12 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "service-request-tracker/backend",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Laravel REST API for the Service Request Tracker.",
     "keywords": [
         "laravel",
-        "framework"
+        "sanctum",
+        "rest-api"
     ],
     "license": "MIT",
     "require": {
