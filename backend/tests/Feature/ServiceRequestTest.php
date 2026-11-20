@@ -72,6 +72,23 @@ class ServiceRequestTest extends TestCase
             ->assertJsonValidationErrors(['title', 'description']);
     }
 
+    public function test_create_accepts_values_at_the_exact_limits(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->postJson('/api/requests', [
+            'title' => 'abc',
+            'description' => str_repeat('a', 10),
+            'priority' => 'LOW',
+        ])->assertCreated();
+
+        $this->actingAs($user)->postJson('/api/requests', [
+            'title' => str_repeat('a', 100),
+            'description' => str_repeat('a', 500),
+            'priority' => 'MEDIUM',
+        ])->assertCreated();
+    }
+
     public function test_guest_cannot_create_or_list_requests(): void
     {
         $this->postJson('/api/requests', [])->assertUnauthorized();
@@ -103,6 +120,24 @@ class ServiceRequestTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Printer not working');
+    }
+
+    public function test_search_treats_percent_and_underscore_as_normal_characters(): void
+    {
+        $user = User::factory()->create();
+        ServiceRequest::factory()->for($user, 'creator')->create(['title' => 'Disk 100% full']);
+        ServiceRequest::factory()->for($user, 'creator')->create(['title' => 'Rename file_name.txt']);
+        ServiceRequest::factory()->for($user, 'creator')->create(['title' => 'Printer not working']);
+
+        $this->actingAs($user)->getJson('/api/requests?search=%25')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Disk 100% full');
+
+        $this->actingAs($user)->getJson('/api/requests?search=_')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Rename file_name.txt');
     }
 
     public function test_list_can_filter_by_status_and_priority_together(): void

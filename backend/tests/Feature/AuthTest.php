@@ -56,6 +56,20 @@ class AuthTest extends TestCase
 
         $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'wrong'])
             ->assertTooManyRequests();
+
+        // The limit is per email, so another user on the same network can still log in.
+        $otherUser = User::factory()->create(['password' => 'secret-password']);
+        $this->postJson('/api/auth/login', ['email' => $otherUser->email, 'password' => 'secret-password'])
+            ->assertOk();
+    }
+
+    public function test_bearer_tokens_are_ignored(): void
+    {
+        // Only cookie sessions are supported. A bearer token must give a clean 401, not an error.
+        $this->withHeader('Authorization', 'Bearer 1|fake-token')
+            ->getJson('/api/auth/me')
+            ->assertUnauthorized()
+            ->assertExactJson(['message' => 'Unauthenticated.']);
     }
 
     public function test_me_returns_401_when_not_logged_in(): void
