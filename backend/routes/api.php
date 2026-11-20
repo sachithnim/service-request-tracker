@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ServiceRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -11,4 +12,11 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('requests', [ServiceRequestController::class, 'index']);
+    Route::post('requests', [ServiceRequestController::class, 'store']);
+    Route::get('requests/{serviceRequest}', [ServiceRequestController::class, 'show']);
+    Route::get('requests/{serviceRequest}/history', [ServiceRequestController::class, 'history']);
 });

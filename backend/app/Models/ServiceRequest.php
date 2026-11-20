@@ -27,6 +27,7 @@ class ServiceRequest extends Model
     protected function casts(): array
     {
         return [
+            'created_by' => 'integer',
             'priority' => RequestPriority::class,
             'status' => RequestStatus::class,
             'version' => 'integer',
