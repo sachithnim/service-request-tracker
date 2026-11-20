@@ -19,7 +19,7 @@ class ServiceRequestController extends Controller
     public function index(ListServiceRequestsRequest $request): AnonymousResourceCollection
     {
         $serviceRequests = $request->user()->serviceRequests()
-            ->when($request->validated('search'), fn ($query, $search) => $query->where('title', 'like', "%{$search}%"))
+            ->when($request->validated('search'), fn ($query, $search) => $query->searchTitle($search))
             ->when($request->validated('status'), fn ($query, $status) => $query->where('status', $status))
             ->when($request->validated('priority'), fn ($query, $priority) => $query->where('priority', $priority))
             ->latest()

@@ -6,6 +6,8 @@ use App\Enums\RequestPriority;
 use App\Enums\RequestStatus;
 use Database\Factories\ServiceRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +34,16 @@ class ServiceRequest extends Model
             'status' => RequestStatus::class,
             'version' => 'integer',
         ];
+    }
+
+    // Title "contains" search. % and _ are wildcards in SQL LIKE, so escape them
+    // to search for the literal characters the user typed.
+    #[Scope]
+    protected function searchTitle(Builder $query, string $search): void
+    {
+        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
+
+        $query->where('title', 'like', "%{$escaped}%");
     }
 
     public function creator(): BelongsTo
