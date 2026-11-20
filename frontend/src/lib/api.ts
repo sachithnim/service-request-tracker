@@ -2,7 +2,15 @@
 // Auth uses Sanctum SPA cookies: the browser sends the session cookie automatically
 // (credentials: "include"), and write requests send the CSRF token in X-XSRF-TOKEN.
 
-import type { User, ValidationErrors } from "./types";
+import type {
+  PaginatedResponse,
+  RequestPriority,
+  RequestStatus,
+  ServiceRequest,
+  StatusHistory,
+  User,
+  ValidationErrors,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -84,6 +92,36 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T;
 }
 
+export interface RequestFilters {
+  search?: string;
+  status?: string;
+  priority?: string;
+  page?: number;
+}
+
+export interface NewRequestInput {
+  title: string;
+  description: string;
+  priority: RequestPriority;
+}
+
+export interface StatusUpdateInput {
+  status: RequestStatus;
+  expected_version: number;
+  remark?: string;
+}
+
+// Turns { search: "printer", status: "" } into "search=printer" (empty values are skipped).
+function toQueryString(filters: RequestFilters): string {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+  return params.toString();
+}
+
 export const api = {
   login: (email: string, password: string) =>
     request<{ data: User }>("POST", "/api/auth/login", { email, password }).then((res) => res.data),
@@ -91,4 +129,19 @@ export const api = {
   me: () => request<{ data: User }>("GET", "/api/auth/me").then((res) => res.data),
 
   logout: () => request<void>("POST", "/api/auth/logout"),
+
+  listRequests: (filters: RequestFilters) =>
+    request<PaginatedResponse<ServiceRequest>>("GET", `/api/requests?${toQueryString(filters)}`),
+
+  getRequest: (id: string | number) =>
+    request<{ data: ServiceRequest }>("GET", `/api/requests/${id}`).then((res) => res.data),
+
+  getHistory: (id: string | number) =>
+    request<{ data: StatusHistory[] }>("GET", `/api/requests/${id}/history`).then((res) => res.data),
+
+  createRequest: (input: NewRequestInput) =>
+    request<{ data: ServiceRequest }>("POST", "/api/requests", input).then((res) => res.data),
+
+  updateStatus: (id: string | number, input: StatusUpdateInput) =>
+    request<{ data: ServiceRequest }>("PATCH", `/api/requests/${id}/status`, input).then((res) => res.data),
 };
