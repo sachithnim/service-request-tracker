@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Outside production, fail loudly on lazy loading (N+1 queries),
+        // non-fillable attributes and missing attributes instead of ignoring them.
+        Model::shouldBeStrict(! $this->app->isProduction());
     }
 }

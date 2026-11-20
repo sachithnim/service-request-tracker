@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,4 +21,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Keep API errors short and consistent: just a message, no stack trace or class names.
+        // 401, 409 and 422 already have their own JSON format and are not affected.
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            // Same message for "doesn't exist" and "belongs to someone else",
+            // so the response never reveals whether an ID exists.
+            $message = $e->getStatusCode() === 404
+                ? 'Resource not found.'
+                : $e->getMessage();
+
+            return response()->json(['message' => $message], $e->getStatusCode(), $e->getHeaders());
+        });
     })->create();
