@@ -58,7 +58,7 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
       showToast(`Moved to ${statusLabels[status]}`, { description: request.title });
       // Refresh this page too, in case the user comes back to it.
       onReload();
-      router.push("/requests");
+      router.push(`/requests?highlight=${request.id}`);
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         const message =

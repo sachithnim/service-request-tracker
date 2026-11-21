@@ -44,7 +44,7 @@ export function NewRequestForm() {
       // Next.js keeps this page in memory, so clear it for next time.
       resetForm();
       showToast("Request created", { description: created.title });
-      router.push("/requests");
+      router.push(`/requests?highlight=${created.id}`);
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);

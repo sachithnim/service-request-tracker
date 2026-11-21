@@ -20,6 +20,8 @@ export function RequestsList() {
 
   // Filters live in the URL, so refresh and Back keep them.
   const queryString = searchParams.toString();
+  // Row to highlight after a create or status change.
+  const highlightId = Number(searchParams.get("highlight"));
   const filters: FilterValues = {
     search: searchParams.get("search") ?? "",
     status: searchParams.get("status") ?? "",
@@ -137,10 +139,13 @@ export function RequestsList() {
           </p>
           <ul className="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             {data.data.map((request) => (
-              <li key={request.id}>
+              <li key={request.id} className={request.id === highlightId ? "row-highlight" : undefined}>
                 <Link href={`/requests/${request.id}`} className="block px-4 py-4 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <p className="font-medium text-gray-900">{request.title}</p>
+                    <p className="font-medium text-gray-900">
+                      {request.title}
+                      {request.id === highlightId && <span className="sr-only"> (just updated)</span>}
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       <StatusBadge status={request.status} />
                       <PriorityBadge priority={request.priority} />
