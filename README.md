@@ -298,3 +298,32 @@ In the UI, a 409 shows a warning, reloads the latest version and history automat
 - **No history row on create.** History records status changes; the creation time is `service_requests.created_at`.
 - **Server-owned fields:** `created_by`, `status` and `version` can't be set by the client.
 - **Thin controllers:** validation in Form Requests, ownership in a Policy, the workflow in `StatusTransitionService`, response shapes in API Resources, and one central JSON error handler in `bootstrap/app.php`.
+
+## AI Use & Verification
+
+**Tools used**
+Claude Code (Anthropic), used as a pair-programming assistant inside VS Code.
+
+**Work assisted**
+- Initial scaffolding: migrations, models, Form Requests, API Resources and policies
+- First drafts of the controllers, `StatusTransitionService` and the Laravel feature tests
+- Next.js pages and components, and this README
+
+I defined the scope and order of the work, reviewed every change before committing it, and made all commits myself.
+
+**Representative prompt**
+
+> *"After creating a request, opening 'New request' again still shows the previous values. Find the root cause and fix it properly."*
+
+The assistant identified that Next.js 16 keeps visited routes mounted in the background, so the form kept its previous state. It proposed resetting the form after a successful submit, and doing a full page reload on sign-out so that no data from a previous session stays in memory. I tested both changes in the browser before accepting them.
+
+**Verification and corrections**
+- **Automated checks:** 48 Laravel tests, Laravel Pint, TypeScript, ESLint and a production build were run after each change.
+- **API checks:** every endpoint was tested manually, including 401, 404, 409 and 422 responses.
+- **Manual testing:** I tested the full workflow in the browser, including the stale-update case with two tabs and access to another user's request. Issues I found and had corrected included form state persisting between visits, an unclear confirmation step, duplicated navigation, and pagination that required scrolling.
+- **Clean setup:** I cloned the repository into an empty directory and followed only the README. This revealed a TypeScript error that appeared only before the first build, which was then fixed.
+- **Code review:** I read the generated code, and simplified comments and naming wherever I couldn't explain them clearly.
+
+**Independent technical decisions**
+- **MySQL over SQLite.** SQLite would have been simpler to set up, but I wanted the optimistic-locking update (`UPDATE … WHERE version = ?`) and its transaction to run on a production-grade database.
+- **404 instead of 403 for other users' requests**, applied consistently, so the API never reveals whether a request ID exists.
