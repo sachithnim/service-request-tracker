@@ -40,6 +40,27 @@ class DatabaseSeeder extends Seeder
         $this->createRequest($bob, 'Access to shared finance folder', 'Need read access to the finance team shared drive.', RequestPriority::High, [
             [RequestStatus::InProgress, null],
         ]);
+
+        // More requests for Alice, so the list has two pages.
+        $this->createRequest($alice, 'Keyboard keys sticking', 'Several keys on my keyboard stick when typing.', RequestPriority::Low);
+        $this->createRequest($alice, 'Wi-Fi drops in meeting room B', 'The Wi-Fi connection drops every few minutes in room B.', RequestPriority::Medium, [
+            [RequestStatus::InProgress, 'Network team is checking the access point'],
+        ]);
+        $this->createRequest($alice, 'Need access to the HR portal', 'I need access to the HR portal to submit leave requests.', RequestPriority::Medium, [
+            [RequestStatus::InProgress, null],
+            [RequestStatus::Resolved, 'Access granted'],
+        ]);
+        $this->createRequest($alice, 'Laptop running very slow', 'My laptop takes several minutes to open basic apps.', RequestPriority::High);
+        $this->createRequest($alice, 'Replace broken office chair', 'The height adjustment on my chair is broken.', RequestPriority::Low);
+        $this->createRequest($alice, 'Install Figma on my laptop', 'I need Figma installed for the new design project.', RequestPriority::Low, [
+            [RequestStatus::InProgress, null],
+            [RequestStatus::Resolved, 'Installed and licensed'],
+        ]);
+        $this->createRequest($alice, 'Email not syncing on phone', 'Work email stopped syncing on my phone since Monday.', RequestPriority::Medium);
+        $this->createRequest($alice, 'Monitor flickering', 'The second monitor flickers when the laptop is docked.', RequestPriority::High, [
+            [RequestStatus::InProgress, 'Replacement cable ordered'],
+        ]);
+        $this->createRequest($alice, 'Projector remote missing', 'The remote for the projector in room 4 is missing.', RequestPriority::Low);
     }
 
     // Creates a request and applies each status change, so history and version match.

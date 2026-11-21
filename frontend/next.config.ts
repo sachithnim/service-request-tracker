@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The home page is the request list.
+  async redirects() {
+    return [{ source: "/", destination: "/requests", permanent: false }];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

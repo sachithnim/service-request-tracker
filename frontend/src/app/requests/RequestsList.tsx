@@ -82,7 +82,7 @@ export function RequestsList() {
   const clearFilters = () => updateUrl({ search: "", status: "", priority: "" });
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5 sm:h-[calc(100dvh-7.75rem)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">My requests</h1>
         <Link href="/requests/new" className={buttonClass}>
@@ -131,35 +131,43 @@ export function RequestsList() {
       )}
 
       {!error && data && data.data.length > 0 && (
-        // Old results stay visible (faded) while new ones load.
-        <div aria-busy={loading} className={`space-y-4 transition-opacity ${loading ? "opacity-50" : ""}`}>
-          <p className="text-sm text-gray-600">
-            {data.meta.total} {data.meta.total === 1 ? "request" : "requests"}
-            {hasFilters && " match your filters"}
-          </p>
-          <ul className="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        // On larger screens the page fits the window: the list scrolls inside its card,
+        // so the count and pagination always stay visible. Phones use normal page scrolling.
+        <div
+          aria-busy={loading}
+          className={`flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-opacity sm:min-h-0 ${loading ? "opacity-50" : ""}`}
+        >
+          <ul tabIndex={0} aria-label="Requests" className="divide-y divide-gray-200 focus:outline-none sm:min-h-0 sm:overflow-y-auto">
             {data.data.map((request) => (
               <li key={request.id} className={request.id === highlightId ? "row-highlight" : undefined}>
                 <Link href={`/requests/${request.id}`} className="block px-4 py-4 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <p className="font-medium text-gray-900">
                       {request.title}
                       {request.id === highlightId && <span className="sr-only"> (just updated)</span>}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex shrink-0 flex-wrap gap-2">
                       <StatusBadge status={request.status} />
                       <PriorityBadge priority={request.priority} />
                     </div>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    #{request.id} · Created {formatDate(request.created_at)} · Version {request.version}
+                    Created {formatDate(request.created_at)} · Version {request.version}
                   </p>
                 </Link>
               </li>
             ))}
           </ul>
 
-          <Pagination meta={data.meta} onPageChange={(page) => updateUrl({}, page)} />
+          {/* Footer: result count and pagination, always visible under the list. */}
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-gray-200 bg-gray-50 px-4 py-2.5">
+            <p className="text-sm text-gray-600">
+              {data.meta.total} {data.meta.total === 1 ? "request" : "requests"}
+              {hasFilters && " match your filters"}
+              {data.meta.last_page > 1 && ` · showing ${data.meta.from}–${data.meta.to}`}
+            </p>
+            <Pagination meta={data.meta} onPageChange={(page) => updateUrl({}, page)} />
+          </div>
         </div>
       )}
     </div>
