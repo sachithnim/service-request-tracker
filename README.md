@@ -15,7 +15,7 @@ A compact, secure internal service request tracker. Employees sign in, raise req
 | **Create form with validation errors**<br><img src="screenshots/05-new-request-validation.png" width="420"> | **Request created**<br><img src="screenshots/06-request-created.png" width="420"> |
 | **Request detail (Open)**<br><img src="screenshots/07-request-detail.png" width="420"> | **In progress, with status history**<br><img src="screenshots/08-in-progress-history.png" width="420"> |
 | **Confirm before resolving**<br><img src="screenshots/09-confirm-resolve.png" width="420"> | **Stale update (409): latest version reloaded**<br><img src="screenshots/10-stale-update-409.png" width="420"> |
-| **Another user's request (404)**<br><img src="screenshots/11-not-found.png" width="420"> | **Mobile layout**<br><img src="screenshots/12-mobile.png" width="420"> |
+| **Another user's request (404)**<br><img src="screenshots/11-not-found.png" width="420"> | **Mobile (iPhone 16 Pro Max)**<br><img src="screenshots/12-mobile.png" width="420"> |
 
 ## Repository structure
 
@@ -116,7 +116,7 @@ Created by `php artisan migrate --seed`:
 | Alice Perera | `alice@example.com` | `password` |
 | Bob Fernando | `bob@example.com` | `password` |
 
-Each user has a few sample requests in different statuses. Sign in as one user to confirm you can't see the other user's requests.
+Alice has 12 sample requests in different statuses (two pages), and Bob has 2. Sign in as one user to confirm you can't see the other user's requests.
 
 ## Authentication
 
