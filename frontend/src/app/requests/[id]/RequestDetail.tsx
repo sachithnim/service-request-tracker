@@ -7,6 +7,7 @@ import { HistoryList } from "@/components/HistoryList";
 import { PriorityBadge } from "@/components/PriorityBadge";
 import { StatusActions } from "@/components/StatusActions";
 import { StatusBadge } from "@/components/StatusBadge";
+import { WorkflowSteps } from "@/components/WorkflowSteps";
 import { Alert } from "@/components/ui/Alert";
 import { secondaryButtonClass } from "@/components/ui/FormField";
 import { LoadingState } from "@/components/ui/LoadingState";
@@ -93,6 +94,7 @@ export function RequestDetail() {
 
       <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Change status</h2>
+        <WorkflowSteps status={request.status} />
         <StatusActions request={request} busy={loading} onReload={reload} />
       </section>
 

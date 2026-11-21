@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
-import { buttonClass, FormField, inputClass } from "@/components/ui/FormField";
+import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
 import { api, ApiError } from "@/lib/api";
 import { actionLabels, statusLabels } from "@/lib/labels";
@@ -28,8 +28,19 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
   const [savingTo, setSavingTo] = useState<RequestStatus | null>(null);
   // Conflicts and errors stay on screen (not a toast) because the user needs to act on them.
   const [notice, setNotice] = useState<Notice | null>(null);
+  // RESOLVED is final, so ask once before sending it.
+  const [confirmingResolve, setConfirmingResolve] = useState(false);
+
+  function handleClick(status: RequestStatus) {
+    if (status === "RESOLVED" && !confirmingResolve) {
+      setConfirmingResolve(true);
+      return;
+    }
+    changeStatus(status);
+  }
 
   async function changeStatus(status: RequestStatus) {
+    setConfirmingResolve(false);
     setSavingTo(status);
     setRemarkError(null);
     setNotice(null);
@@ -55,6 +66,7 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
         onReload();
       } else if (error instanceof ApiError && error.status === 422) {
         setRemarkError(error.errors.remark?.[0] ?? error.message);
+        document.getElementById("status-remark")?.focus();
       } else {
         setNotice({ type: "error", message: error instanceof ApiError ? error.message : "Something went wrong." });
       }
@@ -86,13 +98,29 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
             />
           </FormField>
 
-          <div className="flex flex-wrap gap-2">
-            {request.allowed_transitions.map((status) => (
-              <button key={status} type="button" onClick={() => changeStatus(status)} disabled={busy || savingTo !== null} className={buttonClass}>
-                {savingTo === status ? "Saving…" : actionLabels[status]}
-              </button>
-            ))}
-          </div>
+          {confirmingResolve ? (
+            <div role="alertdialog" aria-labelledby="confirm-resolve-text" className="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">
+              <p id="confirm-resolve-text" className="text-sm text-amber-900">
+                Resolving is final. The status can&apos;t be changed after this. Continue?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => changeStatus("RESOLVED")} disabled={busy || savingTo !== null} className={buttonClass}>
+                  {savingTo === "RESOLVED" ? "Saving…" : "Yes, mark as resolved"}
+                </button>
+                <button type="button" onClick={() => setConfirmingResolve(false)} disabled={savingTo !== null} className={secondaryButtonClass}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {request.allowed_transitions.map((status) => (
+                <button key={status} type="button" onClick={() => handleClick(status)} disabled={busy || savingTo !== null} className={buttonClass}>
+                  {savingTo === status ? "Saving…" : actionLabels[status]}
+                </button>
+              ))}
+            </div>
+          )}
         </>
       )}
 
