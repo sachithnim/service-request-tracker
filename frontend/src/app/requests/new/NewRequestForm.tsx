@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
+import { useToast } from "@/components/ui/Toast";
 import { api, ApiError } from "@/lib/api";
 import { PRIORITIES, priorityLabels } from "@/lib/labels";
 import type { RequestPriority, ValidationErrors } from "@/lib/types";
 
 export function NewRequestForm() {
   const router = useRouter();
+  const showToast = useToast();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -38,7 +40,8 @@ export function NewRequestForm() {
       const created = await api.createRequest({ title, description, priority });
       // Next.js keeps this page alive in the background, so reset it for the next visit.
       resetForm();
-      router.push(`/requests/${created.id}?created=1`);
+      showToast("Request created.");
+      router.push(`/requests/${created.id}`);
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useParams } from "next/navigation";
+import { useCallback } from "react";
 import { HistoryList } from "@/components/HistoryList";
 import { PriorityBadge } from "@/components/PriorityBadge";
-import { type StatusResult, StatusActions } from "@/components/StatusActions";
+import { StatusActions } from "@/components/StatusActions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Alert } from "@/components/ui/Alert";
 import { secondaryButtonClass } from "@/components/ui/FormField";
@@ -16,8 +16,6 @@ import { useApiData } from "@/lib/useApiData";
 
 export function RequestDetail() {
   const { id } = useParams<{ id: string }>();
-  const justCreated = useSearchParams().get("created") === "1";
-  const [result, setResult] = useState<StatusResult | null>(justCreated ? { type: "success", message: "Request created." } : null);
 
   // Request and history are loaded together so the version and history always match.
   const load = useCallback(async () => {
@@ -26,11 +24,6 @@ export function RequestDetail() {
   }, [id]);
 
   const { data, error, loading, reload } = useApiData(load);
-
-  function handleStatusResult(next: StatusResult, shouldReload: boolean) {
-    setResult(next);
-    if (shouldReload) reload();
-  }
 
   const backLink = (
     <Link href="/requests" className="text-sm text-blue-700 hover:underline">
@@ -69,8 +62,7 @@ export function RequestDetail() {
     <div className="space-y-6">
       {backLink}
 
-      {result && <Alert type={result.type}>{result.message}</Alert>}
-      {error && <Alert>Couldn&apos;t refresh the request: {error.message}</Alert>}
+      {error &&<Alert>Couldn&apos;t refresh the request: {error.message}</Alert>}
 
       <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm" aria-busy={loading}>
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -101,7 +93,7 @@ export function RequestDetail() {
 
       <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Change status</h2>
-        <StatusActions request={request} busy={loading} onResult={handleStatusResult} />
+        <StatusActions request={request} busy={loading} onReload={reload} />
       </section>
 
       <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">

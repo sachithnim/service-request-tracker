@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RequestDetailPage() {
   return (
     <RequireAuth>
-      {/* RequestDetail reads the URL (useParams / useSearchParams), so it must be inside Suspense. */}
+      {/* RequestDetail reads the URL (useParams), so it must be inside Suspense. */}
       <Suspense fallback={<LoadingState />}>
         <RequestDetail />
       </Suspense>
