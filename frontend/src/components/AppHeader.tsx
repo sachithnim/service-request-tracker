@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "./ui/Toast";
-import { NavLinks } from "./NavLinks";
 
 export function AppHeader() {
   const { user, logout } = useAuth();
@@ -25,22 +24,14 @@ export function AppHeader() {
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-4">
-          <Link href="/requests" className="text-base font-semibold text-gray-900">
-            Service Request Tracker
-          </Link>
-          {/* Next.js needs Suspense around components that read the URL. */}
-          {user && (
-            <Suspense>
-              <NavLinks />
-            </Suspense>
-          )}
-        </div>
+        <Link href="/requests" className="text-base font-semibold text-gray-900">
+          Service Request Tracker
+        </Link>
 
         {user && (
           <div className="flex items-center gap-3 text-sm">
             <span className="text-gray-600">
-              Signed in as <span className="font-medium text-gray-900">{user.name}</span>
+              <span className="hidden sm:inline">Signed in as </span><span className="font-medium text-gray-900">{user.name}</span>
             </span>
             <button
               type="button"
