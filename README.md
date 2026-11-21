@@ -8,7 +8,14 @@ A compact, secure internal service request tracker. Employees sign in, raise req
 
 ## Screenshots
 
-_Added in the next commit._
+| | |
+|---|---|
+| **Sign in**<br><img src="screenshots/01-login.png" width="420"> | **Wrong password**<br><img src="screenshots/02-login-error.png" width="420"> |
+| **My requests (newest first)**<br><img src="screenshots/03-my-requests.png" width="420"> | **Status filter**<br><img src="screenshots/04-filters.png" width="420"> |
+| **Create form with validation errors**<br><img src="screenshots/05-new-request-validation.png" width="420"> | **Request created**<br><img src="screenshots/06-request-created.png" width="420"> |
+| **Request detail (Open)**<br><img src="screenshots/07-request-detail.png" width="420"> | **In progress, with status history**<br><img src="screenshots/08-in-progress-history.png" width="420"> |
+| **Confirm before resolving**<br><img src="screenshots/09-confirm-resolve.png" width="420"> | **Stale update (409): latest version reloaded**<br><img src="screenshots/10-stale-update-409.png" width="420"> |
+| **Another user's request (404)**<br><img src="screenshots/11-not-found.png" width="420"> | **Mobile layout**<br><img src="screenshots/12-mobile.png" width="420"> |
 
 ## Repository structure
 
@@ -136,6 +143,8 @@ Security settings:
 - `Authorization: Bearer` headers are ignored, since only cookie sessions are supported.
 
 ## API reference
+
+**Full documentation with example responses (Postman): https://documenter.getpostman.com/view/38987690/2sBYPv2rwT**
 
 Base URL: `http://localhost:8000`. All `/api/requests` endpoints require a signed-in session.
 
