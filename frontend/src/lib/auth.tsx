@@ -1,6 +1,6 @@
 "use client";
 
-// Keeps track of who is logged in and exposes login() / logout() to the whole app.
+// Who is logged in, plus login() and logout().
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, setUnauthorizedHandler } from "./api";
@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
-  // Tracks whether someone was signed in, so a 401 can tell "session expired" from "never signed in".
+  // Was someone signed in? (tells "session expired" from "not logged in")
   const signedIn = useRef(false);
 
   const clearUser = useCallback(() => {
@@ -29,12 +29,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus("guest");
   }, []);
 
-  // On first load, ask the API whether the session cookie is still valid.
+  // On load, ask the API if we're still logged in.
   useEffect(() => {
     setUnauthorizedHandler(() => {
       if (signedIn.current) {
-        // Session expired: reload the whole app so no data from it stays in memory.
-        window.location.replace("/login");
+        // Session expired: full reload clears old data from memory.
+        const next = window.location.pathname + window.location.search;
+        window.location.replace(`/login?expired=1&next=${encodeURIComponent(next)}`);
       }
     });
 
@@ -61,13 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.logout();
     } catch (error) {
-      // Already logged out on the server (e.g. session expired) is fine.
+      // Already logged out is fine.
       if (!(error instanceof ApiError && error.status === 401)) {
         throw error;
       }
     }
-    // A full page load (not client navigation) clears every page Next.js kept in memory,
-    // so the next person on this browser can't see the previous user's data.
+    // Full reload, so no previous user's data stays in memory.
     signedIn.current = false;
     window.location.replace("/login");
   }, []);

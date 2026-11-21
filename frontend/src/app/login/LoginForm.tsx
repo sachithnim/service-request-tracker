@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass } from "@/components/ui/FormField";
@@ -8,9 +8,17 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { ValidationErrors } from "@/lib/types";
 
+// Only allow our own pages (blocks redirects to other sites).
+function safeNextPath(next: string | null): string {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/requests";
+}
+
 export function LoginForm() {
   const { status, login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = safeNextPath(searchParams.get("next"));
+  const sessionExpired = searchParams.get("expired") === "1";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,12 +26,12 @@ export function LoginForm() {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [message, setMessage] = useState<string | null>(null);
 
-  // Already signed in? Go straight to the requests list.
+  // Already signed in: skip the login page.
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/requests");
+      router.replace(nextPath);
     }
-  }, [status, router]);
+  }, [status, router, nextPath]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,11 +41,11 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      // Don't leave the password in a page Next.js keeps alive in the background.
+      // Next.js keeps this page in memory, so clear the password.
       setEmail("");
       setPassword("");
       setSubmitting(false);
-      router.replace("/requests");
+      router.replace(nextPath);
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);
@@ -53,6 +61,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      {sessionExpired && !message && <Alert type="warning">Your session has expired. Please sign in again.</Alert>}
       {message && <Alert>{message}</Alert>}
 
       <FormField id="login-email" label="Email" error={errors.email}>

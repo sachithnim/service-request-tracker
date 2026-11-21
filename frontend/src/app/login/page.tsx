@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
@@ -9,7 +10,10 @@ export default function LoginPage() {
   return (
     <div className="mx-auto mt-6 max-w-sm sm:mt-12">
       <h1 className="mb-6 text-2xl font-semibold">Sign in</h1>
-      <LoginForm />
+      {/* Next.js needs Suspense around components that read the URL. */}
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
