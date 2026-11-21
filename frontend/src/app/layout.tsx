@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Raise and track internal service requests.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen">
