@@ -17,7 +17,7 @@ export function AppHeader() {
       // logout() reloads the app on /login.
       await logout();
     } catch {
-      showToast("Couldn't sign out. Please try again.", "error");
+      showToast("Couldn't sign out", { description: "Please check your connection and try again.", type: "error" });
       setLoggingOut(false);
     }
   }

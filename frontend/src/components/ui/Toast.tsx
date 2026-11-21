@@ -1,18 +1,24 @@
 "use client";
 
-// Popups that close by themselves. Use: showToast("Saved.") or showToast("Failed.", "error")
+// Popups that close by themselves. Use: showToast("Saved", { description: "…", type: "error" })
 
 import { createContext, useCallback, useContext, useState } from "react";
 
 type ToastType = "success" | "error";
 
+interface ToastOptions {
+  description?: string;
+  type?: ToastType;
+}
+
 interface Toast {
   id: number;
-  message: string;
+  title: string;
+  description?: string;
   type: ToastType;
 }
 
-type ShowToast = (message: string, type?: ToastType) => void;
+type ShowToast = (title: string, options?: ToastOptions) => void;
 
 const ToastContext = createContext<ShowToast | null>(null);
 
@@ -31,9 +37,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback<ShowToast>(
-    (message, type = "success") => {
+    (title, { description, type = "success" } = {}) => {
       const id = Date.now() + Math.random();
-      setToasts((current) => [...current, { id, message, type }]);
+      setToasts((current) => [...current, { id, title, description, type }]);
       setTimeout(() => dismiss(id), TOAST_DURATION_MS);
     },
     [dismiss],
@@ -54,7 +60,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <span aria-hidden="true" className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${style.icon}`}>
                 {style.symbol}
               </span>
-              <span className="min-w-0 flex-1 break-words">{toast.message}</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">{toast.title}</p>
+                {toast.description && <p className="mt-0.5 truncate opacity-90">{toast.description}</p>}
+              </div>
               <button type="button" onClick={() => dismiss(toast.id)} aria-label="Dismiss" className="opacity-60 hover:opacity-100">
                 ✕
               </button>

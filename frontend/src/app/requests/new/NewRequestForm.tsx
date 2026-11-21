@@ -43,7 +43,7 @@ export function NewRequestForm() {
       const created = await api.createRequest({ title, description, priority });
       // Next.js keeps this page in memory, so clear it for next time.
       resetForm();
-      showToast(`Request "${created.title}" was created.`);
+      showToast("Request created", { description: created.title });
       router.push("/requests");
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
