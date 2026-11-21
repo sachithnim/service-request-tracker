@@ -152,7 +152,7 @@ export function RequestsList() {
                     </div>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    #{request.id} · Created {formatDate(request.created_at)} · Version {request.version}
+                    Created {formatDate(request.created_at)} · Version {request.version}
                   </p>
                 </Link>
               </li>
