@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Pagination } from "@/components/Pagination";
 import { PriorityBadge } from "@/components/PriorityBadge";
 import { type FilterValues, RequestFilters } from "@/components/RequestFilters";
@@ -18,7 +18,7 @@ export function RequestsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Filters and page live in the URL, so refresh, back button and shared links keep them.
+  // Filters live in the URL, so refresh and Back keep them.
   const queryString = searchParams.toString();
   const filters: FilterValues = {
     search: searchParams.get("search") ?? "",
@@ -39,10 +39,17 @@ export function RequestsList() {
 
   const { data, error, loading, reload } = useApiData(load, { keepPreviousData: true });
 
+  // Last URL we asked for (the real URL updates a moment later).
+  const pendingQuery = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (pendingQuery.current === queryString) {
+      pendingQuery.current = null;
+    }
+  }, [queryString]);
+
   function updateUrl(changes: Partial<FilterValues>, page = 1) {
-    // Start from the live URL, not the last render, so quick changes
-    // (e.g. status then priority) don't undo each other.
-    const current = new URLSearchParams(window.location.search);
+    const current = new URLSearchParams(pendingQuery.current ?? queryString);
     const values: FilterValues = {
       search: current.get("search") ?? "",
       status: current.get("status") ?? "",
@@ -57,12 +64,12 @@ export function RequestsList() {
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
 
-    // Nothing changed: don't navigate or call the API again.
+    // Same filters: no need to reload.
     if (qs === current.toString()) return;
 
+    pendingQuery.current = qs;
     const url = qs ? `/requests?${qs}` : "/requests";
-    // Filter changes replace the history entry (typing shouldn't fill the back button);
-    // page changes add one, so Back returns to the previous page.
+    // Page changes go into history (Back works); filter changes don't.
     if (page > 1 || current.get("page")) {
       router.push(url);
     } else {
@@ -122,7 +129,7 @@ export function RequestsList() {
       )}
 
       {!error && data && data.data.length > 0 && (
-        // While new results load, keep the old ones visible but faded.
+        // Old results stay visible (faded) while new ones load.
         <div aria-busy={loading} className={`space-y-4 transition-opacity ${loading ? "opacity-50" : ""}`}>
           <p className="text-sm text-gray-600">
             {data.meta.total} {data.meta.total === 1 ? "request" : "requests"}

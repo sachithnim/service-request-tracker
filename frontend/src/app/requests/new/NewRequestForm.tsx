@@ -18,7 +18,7 @@ export function NewRequestForm() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  // No default priority: the user should decide how urgent the request is.
+  // No default, so the user picks the priority.
   const [priority, setPriority] = useState<RequestPriority | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -41,14 +41,14 @@ export function NewRequestForm() {
 
     try {
       const created = await api.createRequest({ title, description, priority });
-      // Next.js keeps this page alive in the background, so reset it for the next visit.
+      // Next.js keeps this page in memory, so clear it for next time.
       resetForm();
-      showToast("Request created.");
-      router.push(`/requests/${created.id}`);
+      showToast(`Request #${created.id} created.`);
+      router.push("/requests");
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);
-        // Put the cursor on the first field that needs fixing (helps keyboard and screen-reader users).
+        // Move the cursor to the first field with an error.
         const firstInvalid = FIELD_ORDER.find((field) => error.errors[field]);
         if (firstInvalid) document.getElementById(`request-${firstInvalid}`)?.focus();
       } else {
@@ -58,7 +58,6 @@ export function NewRequestForm() {
     }
   }
 
-  // The server is the real validator. These limits only guide the user while typing.
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       {message && <Alert>{message}</Alert>}

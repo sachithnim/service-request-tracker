@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
@@ -15,20 +16,20 @@ interface Notice {
 
 interface StatusActionsProps {
   request: ServiceRequest;
-  // True while the parent is reloading the latest version. Buttons are disabled meanwhile.
+  // True while the latest version is loading.
   busy: boolean;
-  // Asks the parent to load the latest request and history.
   onReload: () => void;
 }
 
 export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
   const showToast = useToast();
+  const router = useRouter();
   const [remark, setRemark] = useState("");
   const [remarkError, setRemarkError] = useState<string | null>(null);
   const [savingTo, setSavingTo] = useState<RequestStatus | null>(null);
-  // Conflicts and errors stay on screen (not a toast) because the user needs to act on them.
+  // Shown inline (not a toast) because the user must act on it.
   const [notice, setNotice] = useState<Notice | null>(null);
-  // RESOLVED is final, so ask once before sending it.
+  // RESOLVED is final, so ask first.
   const [confirmingResolve, setConfirmingResolve] = useState(false);
 
   function handleClick(status: RequestStatus) {
@@ -48,20 +49,22 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
     try {
       await api.updateStatus(request.id, {
         status,
-        // The version we are looking at. If someone changed the request since, the API returns 409.
+        // If someone changed it since we loaded it, the API returns 409.
         expected_version: request.version,
         remark: remark.trim() || undefined,
       });
       setRemark("");
-      showToast(`Status changed to ${statusLabels[status]}.`);
+      showToast(`Request #${request.id} moved to ${statusLabels[status]}.`);
+      // Refresh this page too, in case the user comes back to it.
       onReload();
+      router.push("/requests");
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
         const message =
           error.body.reason === "stale_version"
             ? "Someone else changed this request while you were viewing it. The latest version is now shown. Please review it and try again."
             : `${error.message} The latest version is now shown.`;
-        // Keep the remark so the user can retry without typing it again.
+        // Remark is kept, so the user can just retry.
         setNotice({ type: "warning", message });
         onReload();
       } else if (error instanceof ApiError && error.status === 422) {
