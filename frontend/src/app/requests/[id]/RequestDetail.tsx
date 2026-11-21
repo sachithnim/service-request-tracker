@@ -18,7 +18,7 @@ import { useApiData } from "@/lib/useApiData";
 export function RequestDetail() {
   const { id } = useParams<{ id: string }>();
 
-  // Request and history are loaded together so the version and history always match.
+  // Load both together so version and history match.
   const load = useCallback(async () => {
     const [request, history] = await Promise.all([api.getRequest(id), api.getHistory(id)]);
     return { request, history };
@@ -61,6 +61,8 @@ export function RequestDetail() {
 
   return (
     <div className="space-y-6">
+      {/* Sets the browser tab title. */}
+      <title>{`${request.title} · Service Request Tracker`}</title>
       {backLink}
 
       {error &&<Alert>Couldn&apos;t refresh the request: {error.message}</Alert>}
