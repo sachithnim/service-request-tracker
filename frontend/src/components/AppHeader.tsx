@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 
 export function AppHeader() {
   const { user, logout } = useAuth();
-  const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState(false);
 
@@ -15,8 +13,8 @@ export function AppHeader() {
     setLoggingOut(true);
     setError(false);
     try {
+      // logout() reloads the page on /login when it succeeds.
       await logout();
-      router.replace("/login");
     } catch {
       setError(true);
       setLoggingOut(false);

@@ -2,7 +2,7 @@
 
 // Keeps track of who is logged in and exposes login() / logout() to the whole app.
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, setUnauthorizedHandler } from "./api";
 import type { User } from "./types";
 
@@ -21,6 +21,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
+  // Tracks whether someone was signed in, so a 401 can tell "session expired" from "never signed in".
+  const signedIn = useRef(false);
+
   const clearUser = useCallback(() => {
     setUser(null);
     setStatus("guest");
@@ -28,11 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // On first load, ask the API whether the session cookie is still valid.
   useEffect(() => {
-    setUnauthorizedHandler(clearUser);
+    setUnauthorizedHandler(() => {
+      if (signedIn.current) {
+        // Session expired: reload the whole app so no data from it stays in memory.
+        window.location.replace("/login");
+      }
+    });
 
     api
       .me()
       .then((me) => {
+        signedIn.current = true;
         setUser(me);
         setStatus("authenticated");
       })
@@ -43,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const me = await api.login(email, password);
+    signedIn.current = true;
     setUser(me);
     setStatus("authenticated");
   }, []);
@@ -56,8 +66,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     }
-    clearUser();
-  }, [clearUser]);
+    // A full page load (not client navigation) clears every page Next.js kept in memory,
+    // so the next person on this browser can't see the previous user's data.
+    signedIn.current = false;
+    window.location.replace("/login");
+  }, []);
 
   const value = useMemo(() => ({ user, status, login, logout }), [user, status, login, logout]);
 
