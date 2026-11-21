@@ -12,6 +12,8 @@ import type {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export const GENERIC_ERROR = "Something went wrong on our side. Please try again in a moment.";
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -84,7 +86,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     if (response.status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    throw new ApiError(response.status, data.message ?? "Something went wrong. Please try again.", data);
+    // Server errors (500+) get a friendly message instead of the raw "Server Error".
+    const message = response.status >= 500 || !data.message ? GENERIC_ERROR : data.message;
+    throw new ApiError(response.status, message, data);
   }
 
   return data as T;

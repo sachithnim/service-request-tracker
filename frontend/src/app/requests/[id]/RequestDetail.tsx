@@ -11,7 +11,7 @@ import { WorkflowSteps } from "@/components/WorkflowSteps";
 import { Alert } from "@/components/ui/Alert";
 import { secondaryButtonClass } from "@/components/ui/FormField";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { api } from "@/lib/api";
+import { api, GENERIC_ERROR } from "@/lib/api";
 import { formatDate } from "@/lib/labels";
 import { useApiData } from "@/lib/useApiData";
 
@@ -49,7 +49,7 @@ export function RequestDetail() {
     return (
       <div className="space-y-4">
         {backLink}
-        <Alert>{error?.message ?? "Something went wrong."}</Alert>
+        <Alert>{error?.message ?? GENERIC_ERROR}</Alert>
         <button type="button" onClick={reload} className={secondaryButtonClass}>
           Try again
         </button>

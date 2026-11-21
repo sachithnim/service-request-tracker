@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, GENERIC_ERROR } from "@/lib/api";
 import { PRIORITIES, priorityLabels } from "@/lib/labels";
 import type { RequestPriority, ValidationErrors } from "@/lib/types";
 
@@ -52,7 +52,7 @@ export function NewRequestForm() {
         const firstInvalid = FIELD_ORDER.find((field) => error.errors[field]);
         if (firstInvalid) document.getElementById(`request-${firstInvalid}`)?.focus();
       } else {
-        setMessage(error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
+        setMessage(error instanceof ApiError ? error.message : GENERIC_ERROR);
       }
       setSubmitting(false);
     }

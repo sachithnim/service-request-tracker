@@ -3,7 +3,7 @@
 // Loads API data with loading / error / reload. Wrap `load` in useCallback.
 
 import { useCallback, useEffect, useState } from "react";
-import { ApiError } from "./api";
+import { ApiError, GENERIC_ERROR } from "./api";
 
 interface LoadState<T> {
   source?: () => Promise<T>;
@@ -25,7 +25,7 @@ export function useApiData<T>(load: () => Promise<T>, { keepPreviousData = false
       })
       .catch((error) => {
         if (ignore) return;
-        const apiError = error instanceof ApiError ? error : new ApiError(0, "Something went wrong. Please try again.");
+        const apiError = error instanceof ApiError ? error : new ApiError(0, GENERIC_ERROR);
         setState((previous) => ({
           source: load,
           attempt,

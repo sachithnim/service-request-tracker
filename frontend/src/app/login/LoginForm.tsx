@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass } from "@/components/ui/FormField";
-import { ApiError } from "@/lib/api";
+import { ApiError, GENERIC_ERROR } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { ValidationErrors } from "@/lib/types";
 
@@ -53,7 +53,7 @@ export function LoginForm() {
       } else if (error instanceof ApiError && error.status === 429) {
         setMessage("Too many sign-in attempts. Please wait a minute and try again.");
       } else {
-        setMessage(error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
+        setMessage(error instanceof ApiError ? error.message : GENERIC_ERROR);
       }
       setSubmitting(false);
     }

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, GENERIC_ERROR } from "@/lib/api";
 import { actionLabels, statusLabels } from "@/lib/labels";
 import type { RequestStatus, ServiceRequest } from "@/lib/types";
 
@@ -63,7 +63,7 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
         const message =
           error.body.reason === "stale_version"
             ? "Someone else changed this request while you were viewing it. The latest version is now shown. Please review it and try again."
-            : `${error.message} The latest version is now shown.`;
+            : `This request can't move from ${statusLabels[error.body.current_status as RequestStatus]} to ${statusLabels[status]}. The latest version is now shown.`;
         // Remark is kept, so the user can just retry.
         setNotice({ type: "warning", message });
         onReload();
@@ -71,7 +71,7 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
         setRemarkError(error.errors.remark?.[0] ?? error.message);
         document.getElementById("status-remark")?.focus();
       } else {
-        setNotice({ type: "error", message: error instanceof ApiError ? error.message : "Something went wrong." });
+        setNotice({ type: "error", message: error instanceof ApiError ? error.message : GENERIC_ERROR });
       }
     } finally {
       setSavingTo(null);
