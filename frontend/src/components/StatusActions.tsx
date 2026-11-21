@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
-import { buttonClass, FormField, inputClass, secondaryButtonClass } from "@/components/ui/FormField";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { buttonClass, FormField, inputClass } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
 import { api, ApiError, GENERIC_ERROR } from "@/lib/api";
 import { actionLabels, statusLabels } from "@/lib/labels";
@@ -101,29 +102,22 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
             />
           </FormField>
 
-          {confirmingResolve ? (
-            <div role="alertdialog" aria-labelledby="confirm-resolve-text" className="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">
-              <p id="confirm-resolve-text" className="text-sm text-amber-900">
-                Resolving is final. The status can&apos;t be changed after this. Continue?
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => changeStatus("RESOLVED")} disabled={busy || savingTo !== null} className={buttonClass}>
-                  {savingTo === "RESOLVED" ? "Saving…" : "Yes, mark as resolved"}
-                </button>
-                <button type="button" onClick={() => setConfirmingResolve(false)} disabled={savingTo !== null} className={secondaryButtonClass}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {request.allowed_transitions.map((status) => (
-                <button key={status} type="button" onClick={() => handleClick(status)} disabled={busy || savingTo !== null} className={buttonClass}>
-                  {savingTo === status ? "Saving…" : actionLabels[status]}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {request.allowed_transitions.map((status) => (
+              <button key={status} type="button" onClick={() => handleClick(status)} disabled={busy || savingTo !== null} className={buttonClass}>
+                {savingTo === status ? "Saving…" : actionLabels[status]}
+              </button>
+            ))}
+          </div>
+
+          <ConfirmDialog
+            open={confirmingResolve}
+            title="Mark as resolved?"
+            message={`"${request.title}" will be resolved. This is final and the status can't be changed afterwards.`}
+            confirmLabel="Mark as resolved"
+            onConfirm={() => changeStatus("RESOLVED")}
+            onCancel={() => setConfirmingResolve(false)}
+          />
         </>
       )}
 
