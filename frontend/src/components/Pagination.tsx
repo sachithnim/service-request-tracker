@@ -9,6 +9,11 @@ interface PaginationProps {
 export function Pagination({ meta, onPageChange }: PaginationProps) {
   const { current_page, last_page, from, to, total } = meta;
 
+  // Nothing to page through.
+  if (last_page <= 1) {
+    return null;
+  }
+
   return (
     <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
       <p>

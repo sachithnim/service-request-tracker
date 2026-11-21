@@ -37,17 +37,40 @@ export function RequestsList() {
     });
   }, [queryString]);
 
-  const { data, error, loading, reload } = useApiData(load);
+  const { data, error, loading, reload } = useApiData(load, { keepPreviousData: true });
 
-  function updateUrl(values: FilterValues, page = 1) {
+  function updateUrl(changes: Partial<FilterValues>, page = 1) {
+    // Start from the live URL, not the last render, so quick changes
+    // (e.g. status then priority) don't undo each other.
+    const current = new URLSearchParams(window.location.search);
+    const values: FilterValues = {
+      search: current.get("search") ?? "",
+      status: current.get("status") ?? "",
+      priority: current.get("priority") ?? "",
+      ...changes,
+    };
+
     const params = new URLSearchParams();
     if (values.search) params.set("search", values.search);
     if (values.status) params.set("status", values.status);
     if (values.priority) params.set("priority", values.priority);
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
-    router.push(qs ? `/requests?${qs}` : "/requests");
+
+    // Nothing changed: don't navigate or call the API again.
+    if (qs === current.toString()) return;
+
+    const url = qs ? `/requests?${qs}` : "/requests";
+    // Filter changes replace the history entry (typing shouldn't fill the back button);
+    // page changes add one, so Back returns to the previous page.
+    if (page > 1 || current.get("page")) {
+      router.push(url);
+    } else {
+      router.replace(url);
+    }
   }
+
+  const clearFilters = () => updateUrl({ search: "", status: "", priority: "" });
 
   return (
     <div className="space-y-5">
@@ -58,9 +81,9 @@ export function RequestsList() {
         </Link>
       </div>
 
-      <RequestFilters key={queryString} values={filters} onApply={(values) => updateUrl(values)} />
+      <RequestFilters values={filters} onChange={(changes) => updateUrl(changes)} />
 
-      {loading && <LoadingState message="Loading requests…" />}
+      {loading && !data && <LoadingState message="Loading requests…" />}
 
       {!loading && error && (
         <div className="space-y-3">
@@ -70,7 +93,7 @@ export function RequestsList() {
               Try again
             </button>
             {hasFilters && (
-              <button type="button" onClick={() => updateUrl({ search: "", status: "", priority: "" })} className={secondaryButtonClass}>
+              <button type="button" onClick={clearFilters} className={secondaryButtonClass}>
                 Clear filters
               </button>
             )}
@@ -78,16 +101,12 @@ export function RequestsList() {
         </div>
       )}
 
-      {!loading && data && data.data.length === 0 && (
+      {!error && data && data.data.length === 0 && (
         <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-10 text-center">
           {hasFilters ? (
             <>
               <p className="text-gray-700">No requests match your filters.</p>
-              <button
-                type="button"
-                onClick={() => updateUrl({ search: "", status: "", priority: "" })}
-                className={`${secondaryButtonClass} mt-4`}
-              >
+              <button type="button" onClick={clearFilters} className={`${secondaryButtonClass} mt-4`}>
                 Clear filters
               </button>
             </>
@@ -102,8 +121,13 @@ export function RequestsList() {
         </div>
       )}
 
-      {!loading && data && data.data.length > 0 && (
-        <>
+      {!error && data && data.data.length > 0 && (
+        // While new results load, keep the old ones visible but faded.
+        <div aria-busy={loading} className={`space-y-4 transition-opacity ${loading ? "opacity-50" : ""}`}>
+          <p className="text-sm text-gray-600">
+            {data.meta.total} {data.meta.total === 1 ? "request" : "requests"}
+            {hasFilters && " match your filters"}
+          </p>
           <ul className="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             {data.data.map((request) => (
               <li key={request.id}>
@@ -123,8 +147,8 @@ export function RequestsList() {
             ))}
           </ul>
 
-          <Pagination meta={data.meta} onPageChange={(page) => updateUrl(filters, page)} />
-        </>
+          <Pagination meta={data.meta} onPageChange={(page) => updateUrl({}, page)} />
+        </div>
       )}
     </div>
   );

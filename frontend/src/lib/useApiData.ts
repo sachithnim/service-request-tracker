@@ -3,6 +3,8 @@
 // Loads data from the API and tracks loading / error state.
 // `load` must be wrapped in useCallback: when it changes (e.g. new filters), data is fetched again.
 // `reload()` fetches again but keeps showing the current data until the new data arrives.
+// With `keepPreviousData`, the old results also stay visible while a new query loads
+// (used by the list, so changing a filter doesn't blank the page).
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "./api";
@@ -14,7 +16,7 @@ interface LoadState<T> {
   error?: ApiError;
 }
 
-export function useApiData<T>(load: () => Promise<T>) {
+export function useApiData<T>(load: () => Promise<T>, { keepPreviousData = false } = {}) {
   const [state, setState] = useState<LoadState<T>>({});
   const [attempt, setAttempt] = useState(0);
 
@@ -48,7 +50,7 @@ export function useApiData<T>(load: () => Promise<T>) {
   const loading = !sameQuery || state.attempt !== attempt;
 
   return {
-    data: sameQuery ? state.data : undefined,
+    data: sameQuery || keepPreviousData ? state.data : undefined,
     error: sameQuery && !loading ? state.error : undefined,
     loading,
     reload,
