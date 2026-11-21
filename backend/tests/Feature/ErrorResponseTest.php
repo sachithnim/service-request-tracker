@@ -15,7 +15,7 @@ class ErrorResponseTest extends TestCase
     {
         parent::setUp();
 
-        // Make sure nothing leaks even with debug mode on (as in local development).
+        // Nothing should leak, even in debug mode.
         config(['app.debug' => true]);
     }
 

@@ -25,16 +25,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Outside production, fail loudly on lazy loading (N+1 queries),
-        // non-fillable attributes and missing attributes instead of ignoring them.
+        // In development, throw on N+1 queries and other silent model mistakes.
         Model::shouldBeStrict(! $this->app->isProduction());
 
-        // We only use cookie sessions, so ignore any "Authorization: Bearer" header.
-        // Without this, Sanctum would look for API tokens in a table we don't have.
+        // Cookie login only: ignore Bearer tokens.
         Sanctum::getAccessTokenFromRequestUsing(fn () => null);
 
-        // 5 login attempts per minute for each email + IP, so one person
-        // can't lock out everyone else on the same network.
+        // 5 login tries per minute, per email + IP.
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by(Str::lower((string) $request->input('email')).'|'.$request->ip());
         });

@@ -1,6 +1,6 @@
 "use client";
 
-// Filters apply as you use them: dropdowns straight away, search after a short pause in typing.
+// Dropdowns filter straight away; search waits until you stop typing.
 
 import { useEffect, useState } from "react";
 import { inputClass, secondaryButtonClass } from "@/components/ui/FormField";
@@ -13,19 +13,19 @@ export interface FilterValues {
 }
 
 interface RequestFiltersProps {
-  values: FilterValues; // current filters from the URL
-  onChange: (changes: Partial<FilterValues>) => void; // only the filters that changed
+  values: FilterValues;
+  onChange: (changes: Partial<FilterValues>) => void;
 }
 
-// Wait this long after the last keystroke before searching, so we don't call the API on every key.
+// Wait after the last key so we don't call the API on every key.
 const SEARCH_DELAY_MS = 400;
 
 export function RequestFilters({ values, onChange }: RequestFiltersProps) {
   const [search, setSearch] = useState(values.search);
-  // The URL search value the input was last synced with.
+  // Last search value taken from the URL.
   const [syncedSearch, setSyncedSearch] = useState(values.search);
 
-  // The URL changed from outside (Clear, back button): show that value in the input.
+  // URL changed elsewhere (Clear, Back): update the box.
   if (values.search !== syncedSearch) {
     setSyncedSearch(values.search);
     setSearch(values.search);
@@ -42,7 +42,6 @@ export function RequestFilters({ values, onChange }: RequestFiltersProps) {
   useEffect(() => {
     const timer = setTimeout(() => applySearch(search), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-    // Only re-run when the typed text changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -59,7 +58,7 @@ export function RequestFilters({ values, onChange }: RequestFiltersProps) {
       role="search"
       aria-label="Filter requests"
       onSubmit={(event) => {
-        // Enter in the search box searches right away.
+        // Enter searches straight away.
         event.preventDefault();
         applySearch(search);
       }}

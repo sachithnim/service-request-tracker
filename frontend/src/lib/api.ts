@@ -1,6 +1,4 @@
-// Every call to the Laravel API goes through this file.
-// Auth uses Sanctum SPA cookies: the browser sends the session cookie automatically
-// (credentials: "include"), and write requests send the CSRF token in X-XSRF-TOKEN.
+// All calls to the Laravel API. Uses Sanctum cookies + CSRF header.
 
 import type {
   PaginatedResponse,
@@ -28,7 +26,7 @@ export class ApiError extends Error {
   }
 }
 
-// Called on any 401 so the app can send the user back to the login page.
+// Runs on any 401 (session ended).
 let onUnauthorized: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: (() => void) | null) {
@@ -70,7 +68,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
   let response = await send(method, path, body);
 
-  // 419 = CSRF token expired. Get a fresh one and retry once.
+  // 419 = CSRF token expired: get a new one and retry once.
   if (response.status === 419 && isWrite) {
     await refreshCsrfCookie();
     response = await send(method, path, body);
@@ -102,7 +100,7 @@ export interface RequestFilters {
 export interface NewRequestInput {
   title: string;
   description: string;
-  priority: RequestPriority | ""; // "" = not chosen yet; the API answers with a 422
+  priority: RequestPriority | "";
 }
 
 export interface StatusUpdateInput {
@@ -111,7 +109,7 @@ export interface StatusUpdateInput {
   remark?: string;
 }
 
-// Turns { search: "printer", status: "" } into "search=printer" (empty values are skipped).
+// Builds ?a=1&b=2, skipping empty values.
 function toQueryString(filters: RequestFilters): string {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {

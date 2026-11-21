@@ -1,4 +1,4 @@
-// Shows where the request is in the workflow: Open → In progress → Resolved.
+// Open → In progress → Resolved, with the current step highlighted.
 
 import { STATUSES, statusLabels } from "@/lib/labels";
 import type { RequestStatus } from "@/lib/types";

@@ -13,8 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// created_by, status and version are not fillable on purpose:
-// the owner comes from the logged-in user and status/version only change through the workflow.
+// created_by, status and version are set by the server, never from user input.
 #[Fillable(['title', 'description', 'priority'])]
 class ServiceRequest extends Model
 {
@@ -36,8 +35,7 @@ class ServiceRequest extends Model
         ];
     }
 
-    // Title "contains" search. % and _ are wildcards in SQL LIKE, so escape them
-    // to search for the literal characters the user typed.
+    // Title search. Escapes % and _ so they aren't treated as wildcards.
     #[Scope]
     protected function searchTitle(Builder $query, string $search): void
     {

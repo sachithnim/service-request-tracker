@@ -1,4 +1,4 @@
-// Display text for API values. Change wording here and it updates everywhere.
+// Text shown for API values.
 
 import type { RequestPriority, RequestStatus } from "./types";
 
@@ -17,7 +17,7 @@ export const priorityLabels: Record<RequestPriority, string> = {
   HIGH: "High",
 };
 
-// Button text for moving a request TO this status.
+// Button text for moving to each status.
 export const actionLabels: Record<RequestStatus, string> = {
   OPEN: "Reopen",
   IN_PROGRESS: "Start progress",

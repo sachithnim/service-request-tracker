@@ -1,10 +1,6 @@
 "use client";
 
-// Loads data from the API and tracks loading / error state.
-// `load` must be wrapped in useCallback: when it changes (e.g. new filters), data is fetched again.
-// `reload()` fetches again but keeps showing the current data until the new data arrives.
-// With `keepPreviousData`, the old results also stay visible while a new query loads
-// (used by the list, so changing a filter doesn't blank the page).
+// Loads API data with loading / error / reload. Wrap `load` in useCallback.
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "./api";
@@ -38,7 +34,7 @@ export function useApiData<T>(load: () => Promise<T>, { keepPreviousData = false
         }));
       });
 
-    // Ignore late responses from an older request (e.g. the user changed filters quickly).
+    // Ignore answers to an older request.
     return () => {
       ignore = true;
     };

@@ -13,15 +13,14 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->string('title', 100);
             $table->string('description', 500);
-            // Stored as strings (not DB enums) so adding a new value doesn't need an ALTER TABLE.
-            // Allowed values are enforced by App\Enums and request validation.
+            // Strings, not DB enums: new values need no migration.
             $table->string('priority', 10);
             $table->string('status', 20)->default('OPEN');
-            // Used for optimistic locking on status updates.
+            // For optimistic locking.
             $table->unsignedInteger('version')->default(1);
             $table->timestamps();
 
-            // List page: own requests, newest first, optionally filtered by status + priority.
+            // For the list page queries.
             $table->index(['created_by', 'created_at']);
             $table->index(['created_by', 'status', 'priority']);
         });

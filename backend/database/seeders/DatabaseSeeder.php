@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    // Demo accounts for local use only. Both use the password "password".
+    // Demo users. Password: "password".
     public function run(): void
     {
         $alice = User::factory()->create([
@@ -42,12 +42,8 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 
-    /**
-     * Creates a request and walks it through the given status changes,
-     * so the seeded history and version always match the current status.
-     *
-     * @param  array<array{0: RequestStatus, 1: ?string}>  $changes
-     */
+    // Creates a request and applies each status change, so history and version match.
+    /** @param  array<array{0: RequestStatus, 1: ?string}>  $changes */
     private function createRequest(User $owner, string $title, string $description, RequestPriority $priority, array $changes = []): void
     {
         $request = $owner->serviceRequests()->create([

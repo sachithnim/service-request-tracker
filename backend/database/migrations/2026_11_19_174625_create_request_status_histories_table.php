@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('from_status', 20);
             $table->string('to_status', 20);
             $table->string('remark', 255)->nullable();
-            // Audit rows are never edited, so there is no updated_at.
+            // Never edited, so no updated_at.
             $table->timestamp('created_at')->useCurrent();
 
             $table->index(['service_request_id', 'created_at']);

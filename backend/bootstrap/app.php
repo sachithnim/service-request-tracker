@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Lets the Next.js app authenticate with session cookies (Sanctum SPA mode).
+        // Session cookie login for the Next.js app.
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -22,15 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
-        // Keep API errors short and consistent: just a message, no stack trace or class names.
-        // 401, 409 and 422 already have their own JSON format and are not affected.
+        // API errors: just a message, no stack trace.
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
             if (! $request->is('api/*')) {
                 return null;
             }
 
-            // Same message for "doesn't exist" and "belongs to someone else",
-            // so the response never reveals whether an ID exists.
+            // Same 404 for missing and not-yours.
             $message = $e->getStatusCode() === 404
                 ? 'Resource not found.'
                 : $e->getMessage();

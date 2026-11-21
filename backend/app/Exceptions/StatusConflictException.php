@@ -7,7 +7,7 @@ use App\Models\ServiceRequest;
 use Illuminate\Http\JsonResponse;
 use RuntimeException;
 
-// Thrown when a status update can't be applied. Always returns HTTP 409.
+// Status update conflict (HTTP 409).
 class StatusConflictException extends RuntimeException
 {
     private function __construct(
@@ -38,7 +38,7 @@ class StatusConflictException extends RuntimeException
 
     public function render(): JsonResponse
     {
-        // Include the latest status and version so the client can refresh and retry.
+        // Current state lets the client refresh and retry.
         return response()->json([
             'message' => $this->getMessage(),
             'reason' => $this->reason,

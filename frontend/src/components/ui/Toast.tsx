@@ -1,7 +1,6 @@
 "use client";
 
-// Small "toast" popups for success messages. They close by themselves after a few seconds.
-// Usage: const showToast = useToast(); showToast("Request created.");
+// Success popups that close by themselves. Use: useToast()("Saved.")
 
 import { createContext, useCallback, useContext, useState } from "react";
 

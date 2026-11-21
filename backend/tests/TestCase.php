@@ -10,8 +10,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Sanctum only starts a session for requests coming from the SPA,
-        // so make every test request look like it came from the frontend.
+        // Sanctum only uses sessions for requests from the frontend.
         $this->withHeader('Referer', config('app.frontend_url'));
     }
 }

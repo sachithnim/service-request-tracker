@@ -22,7 +22,7 @@ class ServiceRequestTest extends TestCase
             'title' => 'Printer not working',
             'description' => 'Office printer stopped responding.',
             'priority' => 'HIGH',
-            // These must be ignored: the server decides them.
+            // Should be ignored.
             'created_by' => $otherUser->id,
             'status' => 'RESOLVED',
             'version' => 9,

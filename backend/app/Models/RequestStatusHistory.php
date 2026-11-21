@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['actor_user_id', 'from_status', 'to_status', 'remark'])]
 class RequestStatusHistory extends Model
 {
-    // History rows are write-once, so the table has no updated_at column.
+    // History rows are never edited (no updated_at).
     const UPDATED_AT = null;
 
     protected function casts(): array

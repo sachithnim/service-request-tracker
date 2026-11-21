@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\ServiceRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
-    // Rate limit defined in AppServiceProvider: 5 attempts per minute per email + IP.
+    // Limit set in AppServiceProvider.
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
 
     Route::middleware('auth:sanctum')->group(function () {

@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// The backend is API-only. The web UI lives in the Next.js frontend.
+// API only. The UI is the Next.js app.
 Route::get('/', fn () => response()->json([
     'name' => config('app.name'),
     'status' => 'ok',

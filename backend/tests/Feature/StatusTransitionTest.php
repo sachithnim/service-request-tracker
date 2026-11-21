@@ -108,7 +108,7 @@ class StatusTransitionTest extends TestCase
 
     public function test_stale_version_returns_409_without_overwriting_the_latest_state(): void
     {
-        // Someone already moved it to IN_PROGRESS (version 2), but this client still has version 1.
+        // Already at version 2, but the client sends 1.
         $serviceRequest = $this->createRequest(RequestStatus::InProgress, 2);
 
         $this->actingAs($this->user)
@@ -128,7 +128,7 @@ class StatusTransitionTest extends TestCase
 
     public function test_second_update_with_the_same_version_is_rejected(): void
     {
-        // Two browser tabs loaded version 1 and both try to update.
+        // Two tabs both send version 1.
         $serviceRequest = $this->createRequest(RequestStatus::Open, 1);
         $body = ['status' => 'IN_PROGRESS', 'expected_version' => 1];
 
@@ -143,9 +143,7 @@ class StatusTransitionTest extends TestCase
 
     public function test_atomic_update_rejects_a_change_that_happened_after_the_request_was_loaded(): void
     {
-        // Simulates a real race: this request loaded version 1, then another
-        // request saved first. The in-memory check passes, so only the
-        // "UPDATE ... WHERE version = 1" in the database can catch it.
+        // Another request saves first; only the SQL version check can catch it.
         $serviceRequest = $this->createRequest(RequestStatus::Open, 1);
         ServiceRequest::whereKey($serviceRequest->id)->update(['status' => 'IN_PROGRESS', 'version' => 2]);
 
@@ -210,7 +208,7 @@ class StatusTransitionTest extends TestCase
             ->patchJson($this->url($serviceRequest), ['status' => 'IN_PROGRESS', 'expected_version' => 1])
             ->assertNotFound();
 
-        // Still 404 (not 422) with an invalid body, so the request's existence isn't revealed.
+        // Still 404, not 422.
         $this->actingAs($intruder)
             ->patchJson($this->url($serviceRequest), [])
             ->assertNotFound();

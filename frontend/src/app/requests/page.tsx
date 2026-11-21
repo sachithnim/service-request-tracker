@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RequestsPage() {
   return (
     <RequireAuth>
-      {/* RequestsList reads the URL (useSearchParams), which Next.js requires inside Suspense. */}
+      {/* Next.js needs Suspense around components that read the URL. */}
       <Suspense fallback={<LoadingState />}>
         <RequestsList />
       </Suspense>
