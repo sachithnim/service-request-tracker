@@ -41,6 +41,7 @@ export function LoginForm() {
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);
+        document.getElementById(error.errors.email ? "login-email" : "login-password")?.focus();
       } else if (error instanceof ApiError && error.status === 429) {
         setMessage("Too many sign-in attempts. Please wait a minute and try again.");
       } else {

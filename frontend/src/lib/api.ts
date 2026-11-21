@@ -102,7 +102,7 @@ export interface RequestFilters {
 export interface NewRequestInput {
   title: string;
   description: string;
-  priority: RequestPriority;
+  priority: RequestPriority | ""; // "" = not chosen yet; the API answers with a 422
 }
 
 export interface StatusUpdateInput {

@@ -10,13 +10,16 @@ import { api, ApiError } from "@/lib/api";
 import { PRIORITIES, priorityLabels } from "@/lib/labels";
 import type { RequestPriority, ValidationErrors } from "@/lib/types";
 
+const FIELD_ORDER = ["title", "description", "priority"];
+
 export function NewRequestForm() {
   const router = useRouter();
   const showToast = useToast();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<RequestPriority>("MEDIUM");
+  // No default priority: the user should decide how urgent the request is.
+  const [priority, setPriority] = useState<RequestPriority | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -24,7 +27,7 @@ export function NewRequestForm() {
   function resetForm() {
     setTitle("");
     setDescription("");
-    setPriority("MEDIUM");
+    setPriority("");
     setErrors({});
     setMessage(null);
     setSubmitting(false);
@@ -45,6 +48,9 @@ export function NewRequestForm() {
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
         setErrors(error.errors);
+        // Put the cursor on the first field that needs fixing (helps keyboard and screen-reader users).
+        const firstInvalid = FIELD_ORDER.find((field) => error.errors[field]);
+        if (firstInvalid) document.getElementById(`request-${firstInvalid}`)?.focus();
       } else {
         setMessage(error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
       }
@@ -68,6 +74,7 @@ export function NewRequestForm() {
           aria-describedby={errors.title ? "request-title-error" : undefined}
           className={inputClass}
         />
+        <p className="text-right text-xs text-gray-500">{title.length}/100</p>
       </FormField>
 
       <FormField id="request-description" label="Description" error={errors.description} hint="10–500 characters">
@@ -88,11 +95,14 @@ export function NewRequestForm() {
         <select
           id="request-priority"
           value={priority}
-          onChange={(e) => setPriority(e.target.value as RequestPriority)}
+          onChange={(e) => setPriority(e.target.value as RequestPriority | "")}
           aria-invalid={Boolean(errors.priority)}
           aria-describedby={errors.priority ? "request-priority-error" : undefined}
           className={inputClass}
         >
+          <option value="" disabled>
+            Select a priority…
+          </option>
           {PRIORITIES.map((value) => (
             <option key={value} value={value}>
               {priorityLabels[value]}
