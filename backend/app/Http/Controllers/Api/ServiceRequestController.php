@@ -32,8 +32,7 @@ class ServiceRequestController extends Controller
 
     public function store(StoreServiceRequestRequest $request): ServiceRequestResource
     {
-        // Creating through the user's relationship sets created_by from the session,
-        // never from the request body. Status and version use their defaults (OPEN, 1).
+        // created_by comes from the logged-in user; status and version use defaults.
         $serviceRequest = $request->user()->serviceRequests()->create($request->validated());
 
         return new ServiceRequestResource($serviceRequest);

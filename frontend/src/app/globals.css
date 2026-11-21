@@ -3,3 +3,17 @@
 body {
   @apply bg-gray-50 text-gray-900 antialiased;
 }
+
+/* Briefly marks the row that was just created or changed. */
+@keyframes row-highlight {
+  from {
+    background-color: var(--color-blue-100);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.row-highlight {
+  animation: row-highlight 3s ease-out;
+}

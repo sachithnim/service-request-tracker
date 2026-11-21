@@ -10,11 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class StatusTransitionService
 {
-    /**
-     * Moves a request to a new status using optimistic locking.
-     *
-     * @throws StatusConflictException when the version is stale or the transition isn't allowed
-     */
+    // Changes the status using optimistic locking (version check).
+    /** @throws StatusConflictException */
     public function transition(
         ServiceRequest $serviceRequest,
         RequestStatus $toStatus,
@@ -33,8 +30,7 @@ class StatusTransitionService
         }
 
         DB::transaction(function () use ($serviceRequest, $fromStatus, $toStatus, $expectedVersion, $actor, $remark) {
-            // The version check and the update happen in one SQL statement, so if two
-            // requests race with the same version, only one of them can match the row.
+            // Check and update in one query, so only one of two racing requests wins.
             $updated = ServiceRequest::query()
                 ->whereKey($serviceRequest->id)
                 ->where('version', $expectedVersion)

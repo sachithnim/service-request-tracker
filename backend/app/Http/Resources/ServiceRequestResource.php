@@ -16,7 +16,7 @@ class ServiceRequestResource extends JsonResource
             'priority' => $this->priority,
             'status' => $this->status,
             'version' => $this->version,
-            // Lets the UI show only the status buttons that are valid right now.
+            // The UI shows a button for each of these.
             'allowed_transitions' => $this->status->allowedTransitions(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

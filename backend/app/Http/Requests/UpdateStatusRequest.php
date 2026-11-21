@@ -10,8 +10,7 @@ use Illuminate\Validation\Rule;
 
 class UpdateStatusRequest extends FormRequest
 {
-    // Runs before validation, so someone else's request gets a 404
-    // even when the body is invalid.
+    // Runs before validation, so others' requests always get 404.
     public function authorize(): Response
     {
         return Gate::inspect('update', $this->route('serviceRequest'));

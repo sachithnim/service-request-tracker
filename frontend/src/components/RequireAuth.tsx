@@ -1,6 +1,6 @@
 "use client";
 
-// Wrap any page that needs a logged-in user. Guests are sent to /login.
+// Wrap pages that need login. Guests go to /login.
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,7 +13,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (status === "guest") {
-      router.replace("/login");
+      // Come back here after login.
+      const next = window.location.pathname + window.location.search;
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
     }
   }, [status, router]);
 

@@ -1,10 +1,18 @@
-// Every call to the Laravel API goes through this file.
-// Auth uses Sanctum SPA cookies: the browser sends the session cookie automatically
-// (credentials: "include"), and write requests send the CSRF token in X-XSRF-TOKEN.
+// All calls to the Laravel API. Uses Sanctum cookies + CSRF header.
 
-import type { User, ValidationErrors } from "./types";
+import type {
+  PaginatedResponse,
+  RequestPriority,
+  RequestStatus,
+  ServiceRequest,
+  StatusHistory,
+  User,
+  ValidationErrors,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export const GENERIC_ERROR = "Something went wrong on our side. Please try again in a moment.";
 
 export class ApiError extends Error {
   constructor(
@@ -20,7 +28,7 @@ export class ApiError extends Error {
   }
 }
 
-// Called on any 401 so the app can send the user back to the login page.
+// Runs on any 401 (session ended).
 let onUnauthorized: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: (() => void) | null) {
@@ -62,7 +70,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
   let response = await send(method, path, body);
 
-  // 419 = CSRF token expired. Get a fresh one and retry once.
+  // 419 = CSRF token expired: get a new one and retry once.
   if (response.status === 419 && isWrite) {
     await refreshCsrfCookie();
     response = await send(method, path, body);
@@ -78,10 +86,42 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     if (response.status === 401 && onUnauthorized) {
       onUnauthorized();
     }
-    throw new ApiError(response.status, data.message ?? "Something went wrong. Please try again.", data);
+    // Server errors (500+) get a friendly message instead of the raw "Server Error".
+    const message = response.status >= 500 || !data.message ? GENERIC_ERROR : data.message;
+    throw new ApiError(response.status, message, data);
   }
 
   return data as T;
+}
+
+export interface RequestFilters {
+  search?: string;
+  status?: string;
+  priority?: string;
+  page?: number;
+}
+
+export interface NewRequestInput {
+  title: string;
+  description: string;
+  priority: RequestPriority | "";
+}
+
+export interface StatusUpdateInput {
+  status: RequestStatus;
+  expected_version: number;
+  remark?: string;
+}
+
+// Builds ?a=1&b=2, skipping empty values.
+function toQueryString(filters: RequestFilters): string {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+  return params.toString();
 }
 
 export const api = {
@@ -91,4 +131,19 @@ export const api = {
   me: () => request<{ data: User }>("GET", "/api/auth/me").then((res) => res.data),
 
   logout: () => request<void>("POST", "/api/auth/logout"),
+
+  listRequests: (filters: RequestFilters) =>
+    request<PaginatedResponse<ServiceRequest>>("GET", `/api/requests?${toQueryString(filters)}`),
+
+  getRequest: (id: string | number) =>
+    request<{ data: ServiceRequest }>("GET", `/api/requests/${id}`).then((res) => res.data),
+
+  getHistory: (id: string | number) =>
+    request<{ data: StatusHistory[] }>("GET", `/api/requests/${id}/history`).then((res) => res.data),
+
+  createRequest: (input: NewRequestInput) =>
+    request<{ data: ServiceRequest }>("POST", "/api/requests", input).then((res) => res.data),
+
+  updateStatus: (id: string | number, input: StatusUpdateInput) =>
+    request<{ data: ServiceRequest }>("PATCH", `/api/requests/${id}/status`, input).then((res) => res.data),
 };

@@ -42,5 +42,5 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// Field name → list of messages, as returned by a 422 response.
+// 422 errors: field → messages.
 export type ValidationErrors = Record<string, string[]>;

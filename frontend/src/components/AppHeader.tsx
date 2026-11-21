@@ -1,24 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "./ui/Toast";
+import { NavLinks } from "./NavLinks";
 
 export function AppHeader() {
   const { user, logout } = useAuth();
-  const router = useRouter();
+  const showToast = useToast();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [error, setError] = useState(false);
 
   async function handleLogout() {
     setLoggingOut(true);
-    setError(false);
     try {
+      // logout() reloads the app on /login.
       await logout();
-      router.replace("/login");
     } catch {
-      setError(true);
+      showToast("Couldn't sign out", { description: "Please check your connection and try again.", type: "error" });
       setLoggingOut(false);
     }
   }
@@ -26,9 +25,17 @@ export function AppHeader() {
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <Link href="/requests" className="text-base font-semibold text-gray-900">
-          Service Request Tracker
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link href="/requests" className="text-base font-semibold text-gray-900">
+            Service Request Tracker
+          </Link>
+          {/* Next.js needs Suspense around components that read the URL. */}
+          {user && (
+            <Suspense>
+              <NavLinks />
+            </Suspense>
+          )}
+        </div>
 
         {user && (
           <div className="flex items-center gap-3 text-sm">
@@ -43,11 +50,6 @@ export function AppHeader() {
             >
               {loggingOut ? "Signing out…" : "Sign out"}
             </button>
-            {error && (
-              <span role="alert" className="text-red-600">
-                Couldn&apos;t sign out. Try again.
-              </span>
-            )}
           </div>
         )}
       </div>

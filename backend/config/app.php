@@ -54,7 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    // The Next.js app. Used for CORS and Sanctum's stateful domains.
+    // Next.js app URL (CORS + Sanctum).
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 
     /*

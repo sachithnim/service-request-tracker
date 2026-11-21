@@ -20,7 +20,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // New session ID after login to prevent session fixation.
+        // New session ID (prevents session fixation).
         $request->session()->regenerate();
 
         return new UserResource($request->user());

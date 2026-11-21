@@ -1,8 +1,8 @@
 "use client";
 
-// Keeps track of who is logged in and exposes login() / logout() to the whole app.
+// Who is logged in, plus login() and logout().
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, setUnauthorizedHandler } from "./api";
 import type { User } from "./types";
 
@@ -21,18 +21,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
+  // Was someone signed in? (tells "session expired" from "not logged in")
+  const signedIn = useRef(false);
+
   const clearUser = useCallback(() => {
     setUser(null);
     setStatus("guest");
   }, []);
 
-  // On first load, ask the API whether the session cookie is still valid.
+  // On load, ask the API if we're still logged in.
   useEffect(() => {
-    setUnauthorizedHandler(clearUser);
+    setUnauthorizedHandler(() => {
+      if (signedIn.current) {
+        // Session expired: full reload clears old data from memory.
+        const next = window.location.pathname + window.location.search;
+        window.location.replace(`/login?expired=1&next=${encodeURIComponent(next)}`);
+      }
+    });
 
     api
       .me()
       .then((me) => {
+        signedIn.current = true;
         setUser(me);
         setStatus("authenticated");
       })
@@ -43,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const me = await api.login(email, password);
+    signedIn.current = true;
     setUser(me);
     setStatus("authenticated");
   }, []);
@@ -51,13 +62,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.logout();
     } catch (error) {
-      // Already logged out on the server (e.g. session expired) is fine.
+      // Already logged out is fine.
       if (!(error instanceof ApiError && error.status === 401)) {
         throw error;
       }
     }
-    clearUser();
-  }, [clearUser]);
+    // Full reload, so no previous user's data stays in memory.
+    signedIn.current = false;
+    window.location.replace("/login");
+  }, []);
 
   const value = useMemo(() => ({ user, status, login, logout }), [user, status, login, logout]);
 

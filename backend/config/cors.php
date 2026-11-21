@@ -29,7 +29,7 @@ return [
 
     'max_age' => 0,
 
-    // Needed so the browser sends the session and XSRF cookies.
+    // Lets the browser send cookies.
     'supports_credentials' => true,
 
 ];
