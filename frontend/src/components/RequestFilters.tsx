@@ -62,9 +62,9 @@ export function RequestFilters({ values, onChange }: RequestFiltersProps) {
         event.preventDefault();
         applySearch(search);
       }}
-      className="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto_auto_auto] sm:items-end"
+      className="grid grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto_auto_auto] sm:items-end"
     >
-      <div className="space-y-1">
+      <div className="col-span-2 space-y-1 sm:col-span-1">
         <label htmlFor="filter-search" className="block text-sm font-medium text-gray-700">
           Search by title
         </label>
@@ -107,7 +107,7 @@ export function RequestFilters({ values, onChange }: RequestFiltersProps) {
         </select>
       </div>
 
-      <button type="button" onClick={clearAll} disabled={!hasFilters} className={secondaryButtonClass}>
+      <button type="button" onClick={clearAll} disabled={!hasFilters} className={`${secondaryButtonClass} col-span-2 sm:col-span-1`}>
         Clear
       </button>
     </form>

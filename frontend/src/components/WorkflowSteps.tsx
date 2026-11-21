@@ -23,11 +23,11 @@ export function WorkflowSteps({ status }: { status: RequestStatus }) {
             >
               {done ? "✓" : index + 1}
             </span>
-            <span className={current ? "font-semibold text-gray-900" : "text-gray-500"}>
+            <span className={`whitespace-nowrap ${current ? "font-semibold text-gray-900" : "text-gray-500"}`}>
               {statusLabels[step]}
               {current && <span className="sr-only"> (current step)</span>}
             </span>
-            {index < STATUSES.length - 1 && <span aria-hidden="true" className={`h-0.5 flex-1 ${index < currentIndex ? "bg-green-600" : "bg-gray-200"}`} />}
+            {index < STATUSES.length - 1 && <span aria-hidden="true" className={`h-0.5 min-w-2 flex-1 ${index < currentIndex ? "bg-green-600" : "bg-gray-200"}`} />}
           </li>
         );
       })}
