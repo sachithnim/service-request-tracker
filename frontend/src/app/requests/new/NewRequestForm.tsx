@@ -19,6 +19,15 @@ export function NewRequestForm() {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [message, setMessage] = useState<string | null>(null);
 
+  function resetForm() {
+    setTitle("");
+    setDescription("");
+    setPriority("MEDIUM");
+    setErrors({});
+    setMessage(null);
+    setSubmitting(false);
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
@@ -27,6 +36,8 @@ export function NewRequestForm() {
 
     try {
       const created = await api.createRequest({ title, description, priority });
+      // Next.js keeps this page alive in the background, so reset it for the next visit.
+      resetForm();
       router.push(`/requests/${created.id}?created=1`);
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {

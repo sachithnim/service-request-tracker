@@ -33,6 +33,10 @@ export function LoginForm() {
 
     try {
       await login(email, password);
+      // Don't leave the password in a page Next.js keeps alive in the background.
+      setEmail("");
+      setPassword("");
+      setSubmitting(false);
       router.replace("/requests");
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
