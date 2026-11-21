@@ -28,11 +28,13 @@ A compact, secure internal service request tracker. Employees sign in, raise req
 
 | Tool | Version |
 |---|---|
-| PHP | 8.3 or newer |
+| PHP | 8.4 or newer (tested on 8.5) |
 | Composer | 2.x |
-| MySQL | 8.0 or newer |
-| Node.js | 20.9 or newer |
-| npm | 10.x |
+| MySQL | 8.4 LTS or newer |
+| Node.js | 22 LTS or newer |
+| npm | 10 or newer |
+
+Only actively supported versions are listed: PHP 8.3, Node.js 20 and MySQL 8.0 no longer receive full support.
 
 No paid services are needed. Everything runs locally.
 
