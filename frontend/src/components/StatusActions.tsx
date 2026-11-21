@@ -54,7 +54,7 @@ export function StatusActions({ request, busy, onReload }: StatusActionsProps) {
         remark: remark.trim() || undefined,
       });
       setRemark("");
-      showToast(`Request #${request.id} moved to ${statusLabels[status]}.`);
+      showToast(`"${request.title}" is now ${statusLabels[status]}.`);
       // Refresh this page too, in case the user comes back to it.
       onReload();
       router.push("/requests");

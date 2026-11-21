@@ -3,21 +3,21 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "./ui/Toast";
 import { NavLinks } from "./NavLinks";
 
 export function AppHeader() {
   const { user, logout } = useAuth();
+  const showToast = useToast();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [error, setError] = useState(false);
 
   async function handleLogout() {
     setLoggingOut(true);
-    setError(false);
     try {
       // logout() reloads the app on /login.
       await logout();
     } catch {
-      setError(true);
+      showToast("Couldn't sign out. Please try again.", "error");
       setLoggingOut(false);
     }
   }
@@ -50,11 +50,6 @@ export function AppHeader() {
             >
               {loggingOut ? "Signing out…" : "Sign out"}
             </button>
-            {error && (
-              <span role="alert" className="text-red-600">
-                Couldn&apos;t sign out. Try again.
-              </span>
-            )}
           </div>
         )}
       </div>
